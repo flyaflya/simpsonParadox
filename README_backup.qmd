@@ -107,67 +107,17 @@ This is Simpson's Paradox in action. The species variable is a **confounding var
 
 ### C. Side-by-Side Comparison
 
-```{r}
-#| message: false
-#| warning: false
-#| fig-cap: "Simpson's Paradox: The same data tells two different stories. Top: Overall relationship shows a positive trend. Bottom: When grouped by species, the relationship reverses to negative within each group."
+**🎯 Your Task:** Use Cursor's AI assistant to create a compelling side-by-side comparison plot!
 
-# Create a simple, clean side-by-side comparison
-# Plot 1: Overall relationship
-plot1_simple <- ggplot(data = penguins,
-        aes(x = bill_length_mm,
-        y = bill_depth_mm)) +
-  theme_minimal() +
-  geom_point(alpha = 0.6, color = "steelblue", size = 2) +
-  labs(title = "Overall Relationship",
-       subtitle = "Positive trend when ignoring species",
-       x = "Bill length (mm)",
-       y = "Bill depth (mm)") +
-  geom_smooth(method = "lm", se = FALSE, color = "red", linewidth = 1.5)
+**Instructions:**
+1. Ask Cursor: *"Create a side-by-side comparison plot using patchwork that combines plot1 and plot2 with a title, subtitle, and caption explaining Simpson's Paradox"*
+2. The plot should clearly show the contrast between the overall relationship and the species-specific relationships
+3. Use `theme_minimal(16)` for consistency
+4. **Replace these instructions with the actual plot code that Cursor generates**
+5. **Render the README.md file** using `quarto render README.qmd`
+6. Make sure to sync your changes to your GitHub folder for grading!
 
-# Plot 2: Species-specific relationships
-plot2_simple <- ggplot(data = penguins,
-       aes(x = bill_length_mm,
-           y = bill_depth_mm,
-           color = species)) +
-  theme_minimal() +
-  geom_point(alpha = 0.7, size = 2) +
-  scale_color_manual(values = c("darkorange","purple","cyan4"),
-                     name = "Species") +
-  labs(title = "Species-Specific Relationships",
-       subtitle = "Negative trends within each species",
-       x = "Bill length (mm)",
-       y = "Bill depth (mm)") +
-  theme(legend.position = "bottom") +
-  # Overall trend (ignoring species)
-  geom_smooth(method = "lm", se = FALSE, color = "red", 
-              linewidth = 1.5, alpha = 0.8) +
-  # Species-specific trends
-  geom_smooth(method = "lm", se = FALSE, linewidth = 1)
-
-# Create the comparison using patchwork
-comparison_plot <- plot1_simple / plot2_simple +
-  plot_layout(guides = "collect") +
-  plot_annotation(
-    title = "Simpson's Paradox: When Aggregation Lies",
-    subtitle = "The relationship between bill length and depth reverses when we consider species grouping",
-    caption = "Simpson's Paradox occurs when a trend appears in different groups of data but disappears or reverses when these groups are combined. Here, the overall positive relationship (top) masks the negative relationships within each species (bottom).",
-    theme = theme(
-      plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
-      plot.subtitle = element_text(size = 14, hjust = 0.5),
-      plot.caption = element_text(size = 12, hjust = 0, face = "italic")
-    )
-  )
-
-comparison_plot
-```
-
-**The Power of Side-by-Side Visualization!** 🎯
-
-This comparison makes Simpson's Paradox crystal clear:
-- **Top plot:** Shows the overall positive relationship between bill length and depth
-- **Bottom plot:** Reveals the negative relationships within each species
-- **The paradox:** The same data tells two completely different stories depending on whether we consider the species grouping variable
+**What you should see:** A powerful visualization that makes Simpson's Paradox crystal clear - the same data telling two completely different stories depending on whether we consider the species grouping variable.
 
 ## Key Takeaways: Lessons from Simpson's Paradox
 
