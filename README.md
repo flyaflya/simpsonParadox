@@ -112,87 +112,68 @@ relationship when we aggregate the data.
 ### C. Side-by-Side Comparison
 
 ``` r
-# Create improved versions of the plots for better side-by-side comparison
-# Plot 1: Overall relationship (cleaner version)
-plot1_clean <- ggplot(data = penguins,
+# Create a simple, clean side-by-side comparison
+# Plot 1: Overall relationship
+plot1_simple <- ggplot(data = penguins,
         aes(x = bill_length_mm,
         y = bill_depth_mm)) +
-  theme_minimal(16) +
-  geom_point(alpha = 0.6, color = "steelblue", size = 2.5) +
+  theme_minimal() +
+  geom_point(alpha = 0.6, color = "steelblue", size = 2) +
   labs(title = "Overall Relationship",
-       subtitle = "Ignoring species differences",
+       subtitle = "Positive trend when ignoring species",
        x = "Bill length (mm)",
        y = "Bill depth (mm)") +
-  theme(plot.title = element_text(size = 18, face = "bold"),
-        plot.subtitle = element_text(size = 14),
-        axis.title = element_text(size = 14),
-        axis.text = element_text(size = 12),
-        plot.margin = unit(c(20, 20, 20, 20), "pt")) +
-  geom_smooth(method = "lm", se = FALSE, color = "red", linewidth = 1.5) +
-  annotate("text", x = 55, y = 22, label = "Positive trend", 
-           color = "red", fontface = "bold", size = 5)
+  geom_smooth(method = "lm", se = FALSE, color = "red", linewidth = 1.5)
 
-# Plot 2: Species-specific relationships (cleaner version)
-plot2_clean <- ggplot(data = penguins,
+# Plot 2: Species-specific relationships
+plot2_simple <- ggplot(data = penguins,
        aes(x = bill_length_mm,
            y = bill_depth_mm,
            color = species)) +
-  theme_minimal(16) +
-  geom_point(alpha = 0.7, size = 2.5) +
+  theme_minimal() +
+  geom_point(alpha = 0.7, size = 2) +
   scale_color_manual(values = c("darkorange","purple","cyan4"),
                      name = "Species") +
   labs(title = "Species-Specific Relationships",
-       subtitle = "The paradox revealed",
+       subtitle = "Negative trends within each species",
        x = "Bill length (mm)",
        y = "Bill depth (mm)") +
-  theme(plot.title = element_text(size = 18, face = "bold"),
-        plot.subtitle = element_text(size = 14),
-        axis.title = element_text(size = 14),
-        axis.text = element_text(size = 12),
-        legend.position = "bottom",
-        legend.text = element_text(size = 12),
-        legend.title = element_text(size = 12),
-        plot.margin = unit(c(20, 20, 20, 20), "pt")) +
+  theme(legend.position = "bottom") +
   # Overall trend (ignoring species)
   geom_smooth(method = "lm", se = FALSE, color = "red", 
               linewidth = 1.5, alpha = 0.8) +
   # Species-specific trends
-  geom_smooth(method = "lm", se = FALSE, linewidth = 1) +
-  annotate("text", x = 55, y = 22, label = "Overall: Positive", 
-           color = "red", fontface = "bold", size = 4.5) +
-  annotate("text", x = 55, y = 20, label = "Within species: Negative", 
-           color = "darkblue", fontface = "bold", size = 4.5)
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1)
 
-# Create the side-by-side comparison using patchwork with more space
-side_by_side_plot <- plot1_clean / plot2_clean +
-  plot_layout(guides = "collect", heights = c(1, 1.2)) +
+# Create the comparison using patchwork
+comparison_plot <- plot1_simple / plot2_simple +
+  plot_layout(guides = "collect") +
   plot_annotation(
     title = "Simpson's Paradox: When Aggregation Lies",
     subtitle = "The relationship between bill length and depth reverses when we consider species grouping",
-    caption = "Simpson's Paradox occurs when a trend appears in different groups of data but disappears or reverses when these groups are combined. Here, the overall positive relationship (top) masks the negative relationships within each species (bottom). This demonstrates why we must always examine data at multiple levels of aggregation.",
+    caption = "Simpson's Paradox occurs when a trend appears in different groups of data but disappears or reverses when these groups are combined. Here, the overall positive relationship (top) masks the negative relationships within each species (bottom).",
     theme = theme(
-      plot.title = element_text(size = 22, face = "bold", hjust = 0.5),
-      plot.subtitle = element_text(size = 18, hjust = 0.5),
-      plot.caption = element_text(size = 14, hjust = 0, face = "italic", lineheight = 1.5),
-      plot.margin = unit(c(30, 30, 30, 30), "pt")
+      plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+      plot.subtitle = element_text(size = 14, hjust = 0.5),
+      plot.caption = element_text(size = 12, hjust = 0, face = "italic")
     )
   )
 
-side_by_side_plot
+comparison_plot
 ```
 
-![Simpson’s Paradox: The same data tells two different stories. Left:
-Overall relationship shows a positive trend. Right: When grouped by
+![Simpson’s Paradox: The same data tells two different stories. Top:
+Overall relationship shows a positive trend. Bottom: When grouped by
 species, the relationship reverses to negative within each
 group.](README_files/figure-commonmark/unnamed-chunk-3-1.png)
 
 **The Power of Side-by-Side Visualization!** 🎯
 
-This comparison makes Simpson’s Paradox crystal clear: - **Left plot:**
+This comparison makes Simpson’s Paradox crystal clear: - **Top plot:**
 Shows the overall positive relationship between bill length and depth -
-**Right plot:** Reveals the negative relationships within each species -
-**The paradox:** The same data tells two completely different stories
-depending on whether we consider the species grouping variable
+**Bottom plot:** Reveals the negative relationships within each
+species - **The paradox:** The same data tells two completely different
+stories depending on whether we consider the species grouping variable
 
 ## Key Takeaways: Lessons from Simpson’s Paradox
 
