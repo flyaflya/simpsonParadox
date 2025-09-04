@@ -1,0 +1,12 @@
+
+```{r}
+R.version.string
+```
+
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+data(penguins)
+
+```
