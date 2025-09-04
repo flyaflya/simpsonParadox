@@ -1,0 +1,17 @@
+# Quarto generated files
+README_files/
+README.knit.md
+README.md.html
+README.html
+
+# R generated files
+.RData
+.Rhistory
+.Rapp.history
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
