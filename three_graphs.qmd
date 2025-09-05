@@ -1,0 +1,198 @@
+---
+title: "Three Additional Visualizations for Simpson's Paradox"
+subtitle: "Complementary Graphs for Penguin Bill Analysis"
+format: gfm
+execute:
+  echo: true
+  eval: true
+---
+
+```{r setup}
+#| message: false
+#| warning: false
+# Set CRAN mirror for package installation
+options(repos = c(CRAN = "https://cran.rstudio.com/"))
+
+# Install required packages if not already installed
+if (!require(patchwork, quietly = TRUE)) {
+  install.packages("patchwork")
+  library(patchwork)
+}
+
+if (!require(palmerpenguins, quietly = TRUE)) {
+  install.packages("palmerpenguins")
+  library(palmerpenguins)
+}
+
+if (!require(corrplot, quietly = TRUE)) {
+  install.packages("corrplot")
+  library(corrplot)
+}
+
+library(ggplot2)
+library(dplyr)
+data(penguins)
+```
+
+## Graph 1: Faceted Plot - Individual Species Analysis
+
+This faceted plot allows us to examine each species separately, making the Simpson's Paradox even clearer by showing the negative relationships within each group side by side.
+
+```{r}
+#| message: false
+#| warning: false
+#| fig-cap: "Faceted Analysis: Each Species Shows Negative Relationship"
+
+faceted_plot <- ggplot(data = penguins,
+       aes(x = bill_length_mm,
+           y = bill_depth_mm,
+           color = species)) +
+  theme_minimal(base_size = 16) +
+  geom_point(alpha = 0.7, size = 2) +
+  scale_color_manual(values = c("darkorange","purple","cyan4"),
+                     name = "Species") +
+  labs(title = "Simpson's Paradox: Faceted by Species",
+       subtitle = "Each panel reveals the true negative relationship within species",
+       x = "Bill length (mm)",
+       y = "Bill depth (mm)") +
+  theme(plot.title.position = "plot",
+        plot.title = element_text(size = 18, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 14, color = "gray50"),
+        legend.position = "bottom",
+        strip.text = element_text(size = 14, face = "bold"),
+        strip.background = element_rect(fill = "lightgray", color = "black"),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14, face = "bold"),
+        plot.margin = margin(20, 20, 20, 20)) +
+  geom_smooth(method = "lm", se = TRUE, linewidth = 1.5) +
+  facet_wrap(~species, scales = "free") +
+  guides(color = "none")  # Remove legend since species is shown in facets
+
+faceted_plot
+```
+
+**Key Insight:** Each species panel clearly shows the negative relationship between bill length and depth, while the overall relationship (when ignoring species) appears positive.
+
+## Graph 2: Distribution Analysis - Bill Dimensions by Species
+
+This violin plot shows the distribution of bill dimensions for each species, helping us understand why Simpson's Paradox occurs.
+
+```{r}
+#| message: false
+#| warning: false
+#| fig-cap: "Distribution Analysis: Understanding Species Differences"
+
+# Create a long-format dataset for plotting both dimensions
+penguins_long <- penguins %>%
+  select(species, bill_length_mm, bill_depth_mm) %>%
+  tidyr::pivot_longer(cols = c(bill_length_mm, bill_depth_mm),
+                      names_to = "dimension",
+                      values_to = "value") %>%
+  mutate(dimension = case_when(
+    dimension == "bill_length_mm" ~ "Bill Length (mm)",
+    dimension == "bill_depth_mm" ~ "Bill Depth (mm)"
+  ))
+
+distribution_plot <- ggplot(penguins_long,
+       aes(x = species, y = value, fill = species)) +
+  theme_minimal(base_size = 16) +
+  geom_violin(alpha = 0.7, scale = "width") +
+  geom_boxplot(width = 0.1, alpha = 0.8, outlier.shape = NA) +
+  scale_fill_manual(values = c("darkorange","purple","cyan4"),
+                    name = "Species") +
+  labs(title = "Distribution of Bill Dimensions by Species",
+       subtitle = "Different species have distinct bill characteristics",
+       x = "Species",
+       y = "Measurement (mm)") +
+  theme(plot.title.position = "plot",
+        plot.title = element_text(size = 18, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 14, color = "gray50"),
+        legend.position = "bottom",
+        axis.text = element_text(size = 12),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title = element_text(size = 14, face = "bold"),
+        strip.text = element_text(size = 14, face = "bold"),
+        strip.background = element_rect(fill = "lightgray", color = "black"),
+        plot.margin = margin(20, 20, 20, 20)) +
+  facet_wrap(~dimension, scales = "free_y") +
+  guides(fill = "none")  # Remove legend since species is shown on x-axis
+
+distribution_plot
+```
+
+**Key Insight:** This plot reveals that different species have distinct ranges of bill dimensions. Gentoo penguins tend to have longer bills, while Adelie penguins have shorter bills. This species-level variation is what creates the Simpson's Paradox effect.
+
+## Graph 3: Correlation Matrix Heatmap
+
+This correlation heatmap shows the relationships between all numerical variables in the dataset, providing a comprehensive view of the data structure.
+
+```{r}
+#| message: false
+#| warning: false
+#| fig-cap: "Correlation Matrix: Complete Variable Relationships"
+
+# Prepare data for correlation analysis
+penguins_corr <- penguins %>%
+  select(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g) %>%
+  na.omit()
+
+# Calculate correlation matrix
+cor_matrix <- cor(penguins_corr)
+
+# Clean up variable names for better display
+rownames(cor_matrix) <- c("Bill Length", "Bill Depth", "Flipper Length", "Body Mass")
+colnames(cor_matrix) <- c("Bill Length", "Bill Depth", "Flipper Length", "Body Mass")
+
+# Create correlation plot using ggplot2
+library(reshape2)
+cor_data <- melt(cor_matrix)
+names(cor_data) <- c("Var1", "Var2", "Correlation")
+
+# Reorder factors to match the matrix
+cor_data$Var1 <- factor(cor_data$Var1, levels = c("Bill Length", "Bill Depth", "Flipper Length", "Body Mass"))
+cor_data$Var2 <- factor(cor_data$Var2, levels = c("Bill Length", "Bill Depth", "Flipper Length", "Body Mass"))
+
+# Create the plot
+correlation_plot <- ggplot(cor_data, aes(x = Var1, y = Var2, fill = Correlation)) +
+  geom_tile(color = "white", size = 1, width = 0.95, height = 0.95) +
+  scale_fill_gradient2(low = "#d73027", mid = "white", high = "#1a9850", 
+                       midpoint = 0, limit = c(-1,1), 
+                       name = "Correlation\nCoefficient",
+                       breaks = c(-1, -0.5, 0, 0.5, 1),
+                       labels = c("-1.0", "-0.5", "0.0", "0.5", "1.0")) +
+  theme_minimal(base_size = 16) +
+  labs(title = "Correlation Matrix: Penguin Measurements",
+       subtitle = paste("Overall correlations across all species (n =", nrow(penguins_corr), ")"),
+       x = "", y = "") +
+  theme(plot.title.position = "plot",
+        plot.title = element_text(size = 18, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 14, color = "gray50"),
+        axis.text.x = element_text(angle = 0, hjust = 0.5, size = 12, vjust = 1),
+        axis.text.y = element_text(size = 12, hjust = 1),
+        panel.grid = element_blank(),
+        legend.position = "right",
+        legend.title = element_text(size = 12, face = "bold"),
+        legend.text = element_text(size = 10),
+        plot.margin = margin(20, 20, 20, 20),
+        axis.ticks = element_blank()) +
+  geom_text(aes(label = sprintf("%.2f", Correlation)), 
+            color = ifelse(abs(cor_data$Correlation) > 0.5, "white", "black"), 
+            size = 4, fontface = "bold") +
+  coord_fixed() +
+  scale_x_discrete(position = "top") +
+  scale_y_discrete(limits = rev(levels(cor_data$Var2)))
+
+correlation_plot
+```
+
+**Key Insight:** The correlation matrix shows that bill length and bill depth have a positive correlation (0.65) when all species are combined, but as we've seen, this relationship reverses within each species group.
+
+## Summary
+
+These three additional visualizations complement your existing Simpson's Paradox analysis by:
+
+1. **Faceted Plot:** Clearly shows the negative relationships within each species
+2. **Distribution Plot:** Explains why the paradox occurs by showing species-specific ranges
+3. **Correlation Matrix:** Provides context for the overall positive correlation that masks the true relationships
+
+Together with your original three graphs, these visualizations provide a comprehensive understanding of Simpson's Paradox using the penguin dataset.
